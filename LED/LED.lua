@@ -8,13 +8,13 @@ end
 -- LED Namespace
 LED = {}
 
-LED.Elements = {}
+LED.Entities = {}
 LED.Interactives = {}
 
 function LED:Update(context) 
 	-- Drawing
 	context:SetBlendMode(Blend.Alpha)
-	for k, e in ipairs(LED.Elements) do
+	for k, e in ipairs(LED.Entities) do
 		if (not e.hidden) then
 			context:SetColor(e.color.x,e.color.y,e.color.z, e.color.w)	
 			context:SetScale(e.scale.x, e.scale.y)
@@ -46,40 +46,40 @@ function LED:Update(context)
 end
 
 function LED:Release()
-	for k in pairs (LED.Elements) do
-		LED.Elements[k] = nil
+	for k in pairs (LED.Entities) do
+		LED.Entities[k] = nil
 	end
 	for k in pairs (LED.Interactives) do
 		LED.Interactives[k] = nil
 	end
 end
 
--- ELEMENT - Base class
-LED.Element = {}
+-- ENTITY - Base class
+LED.Entity = {}
 
-function LED.Element:Create(initializing)
-	local element = {}
-	element.position = Vec2(0, 0)
-	element.style = 0
-	element.color = Vec4(1, 1, 1, 1)
-	element.hidden = false
-	element.scale = Vec2(1, 1)
-	element.rotation = 0
-	element.interactive = false
-	setmetatable(element, self)
+function LED.Entity:Create(initializing)
+	local entity = {}
+	entity.position = Vec2(0, 0)
+	entity.style = 0
+	entity.color = Vec4(1, 1, 1, 1)
+	entity.hidden = false
+	entity.scale = Vec2(1, 1)
+	entity.rotation = 0
+	entity.interactive = false
+	setmetatable(entity, self)
 	self.__index = self
-	if (not initializing) then table.insert(LED.Elements, element) end	
-	return element
+	if (not initializing) then table.insert(LED.Entities, entity) end	
+	return entity
 end
 
-function LED.Element:Release()
-	local index = IndexOf(LED.Elements, self)
-	table.remove(LED.Elements, index)
+function LED.Entity:Release()
+	local index = IndexOf(LED.Entities, self)
+	if (index) then table.remove(LED.Entities, index) end	
 	local index = IndexOf(LED.Interactives, self)
-	table.remove(LED.Interactives, index)
+	if (index) then table.remove(LED.Interactives, index) end
 end
 
-function LED.Element:SetInteractive(interactive)
+function LED.Entity:SetInteractive(interactive)
 	if (interactive) then 
 		local index = IndexOf(LED.Interactives, self)
 		if (not index) then
@@ -91,84 +91,84 @@ function LED.Element:SetInteractive(interactive)
 	end
 end
 
-function LED.Element:GetInteractive()
+function LED.Entity:GetInteractive()
 	return IndexOf(LED.Interactives, self)
 end
 
-function LED.Element:MouseIn()
+function LED.Entity:MouseIn()
 end
 
-function LED.Element:MouseOut()
+function LED.Entity:MouseOut()
 end
 
-function LED.Element:MouseOver(x, y)
+function LED.Entity:MouseOver(x, y)
 end
 
-function LED.Element:SetPosition(x, y)
+function LED.Entity:SetPosition(x, y)
 	self.position.x = x
 	self.position.y = y
 end
 
-function LED.Element:GetPosition()
+function LED.Entity:GetPosition()
 	return Vec2(self.position.x, self.position.y)	
 end
 
-function LED.Element:SetScale(x, y)
+function LED.Entity:SetScale(x, y)
 	self.scale.x = x
 	self.scale.y = y
 end
 
-function LED.Element:GetScale()
+function LED.Entity:GetScale()
 	return Vec2(self.scale.x, self.scale.y)
 end
 
-function LED.Element:SetRotation(rotation)
+function LED.Entity:SetRotation(rotation)
 	self.rotation = rotation
 end
 
-function LED.Element:GetRotation()
+function LED.Entity:GetRotation()
 	return self.rotation
 end
 
-function LED.Element:SetHidden(hidden)
+function LED.Entity:SetHidden(hidden)
 	self.hidden = hidden
 end
 
-function LED.Element:GetHidden()
+function LED.Entity:GetHidden()
 	return self.hidden
 end
 
-function LED.Element:SetColor(r, g, b, a)
+function LED.Entity:SetColor(r, g, b, a)
 	self.color.x = r
 	self.color.y = g
 	self.color.z = b
 	self.color.w = a
 end
 
-function LED.Element:GetColor()
+function LED.Entity:GetColor()
 	local color = Vec4(self.color.x, self.color.y, self.color.z, self.color.w)
 end
 
 -- TEXT
-LED.Text = LED.Element:Create(true)
+LED.Text = LED.Entity:Create(true)
 
 function LED.Text:Create(text, font, kerning)
-	local textElement = LED.Element.Create(self)
+	local textEntity = LED.Entity.Create(self)
 	
 	if (font ~= nil) then	
 		if (type(font) == "string") then
-			textElement.font = Font:Load(font)
+			textEntity.font = Font:Load(font)
 		else
-			textElement.font = font
+			textEntity.font = font
 		end
 	else
-		textElement.font = Context:GetCurrent():GetFont()
+		textEntity.font = Context:GetCurrent():GetFont()
 	end
 	
-	textElement:SetColor(0, 0, 0, 1)
-	textElement.text = text or "Text"
-	textElement.kerning = kerning or 1	
-	return textElement
+	textEntity:SetColor(0, 0, 0, 1)
+	textEntity.text = text or "Text"
+	textEntity.kerning = kerning or 1	
+	return textEntity
 end
 
 function LED.Text:Draw(context)
@@ -201,10 +201,10 @@ function LED.Text:GetText()
 end
 
 -- PANEL
-LED.Panel = LED.Element:Create(true)
+LED.Panel = LED.Entity:Create(true)
 
 function LED.Panel:Create(w, h)
-	local panel = LED.Element.Create(self)	
+	local panel = LED.Entity.Create(self)	
 	panel:SetColor(0.5, 0.5, 0.5, 0.5)	
 	panel.dimensions = Vec2(w or 64, h or 64)
 	return panel
@@ -240,10 +240,10 @@ function LED.Panel:GetHeight()
 end
 
 -- IMAGE
-LED.Image = LED.Element:Create(true)
+LED.Image = LED.Entity:Create(true)
 
 function LED.Image:Create(texture)
-	local image = LED.Element.Create(self)
+	local image = LED.Entity.Create(self)
 	
 	if (type(texture) == "string") then
 		image.texture = Texture:Load(texture)
@@ -275,10 +275,10 @@ function LED.Image:GetTexture()
 end
 
 -- ANIMATION
-LED.Animation = LED.Element:Create(true)
+LED.Animation = LED.Entity:Create(true)
 
 function LED.Animation:Create(textures)
-	local animation = LED.Element.Create(self)
+	local animation = LED.Entity.Create(self)
 	animation.frames = {}
 	for k, v in ipairs(textures) do
 		animation.frames[k] = v

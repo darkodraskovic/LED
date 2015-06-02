@@ -43,17 +43,18 @@ pos = led_image:GetPosition()
 led_panel:SetPosition(pos.x + 32, pos.y + 32)
 led_panel:SetColor(0, 0.75, 0.75, 0.5)
 function led_panel:MouseIn()
-	led_text:SetText("I'm LED panel and mouse is over me :) at " .. Time:GetCurrent() .. ".")
+	led_text:SetText("I'm LED panel and mouse is IN me :) at " .. Time:GetCurrent() .. ".")
 	self:SetColor(0.8, 0.1, 0.85, 0.9)
 	self:SetDimensions(148, 80)
 end
 function led_panel:MouseOut()
 	led_text:SetText("Mouse is OUT :( at " .. Time:GetCurrent() .. ".    Q/E to move me | R to release me.")
+	led_text2 = LED.Text:Create("I'll give you mouse hover coords.")
 	self:SetColor(0, 0.75, 0.75, 0.5)
-	self:SetDimensions(128, 64)
+	self:SetDimensions(128, 64)	
 end
 function led_panel:MouseOver(x, y)
-	led_text2:SetText("Mouse coords: x = " .. x .. ", y = " .. y)
+	led_text2:SetText("Mouse OVER coords: x = " .. x .. ", y = " .. y)
 end
 led_panel:SetInteractive(true)
 
@@ -98,17 +99,18 @@ while window:KeyDown(Key.Escape)==false do
 	--Render the world
 	world:Render()
 	
+	--Panel logic
 	local pos = led_panel:GetPosition()
 	if (window:KeyDown(Key.Q)) then 		
 		led_panel:SetPosition(pos.x - Time:GetSpeed() * 5, pos.y)
 	elseif (window:KeyDown(Key.E)) then
 		led_panel:SetPosition(pos.x + Time:GetSpeed() * 5, pos.y)
-	end
-	
+	end	
 	if (window:KeyHit(Key.R)) then
 		led_panel:Release()
 	end
 	
+	--Animation logic 
 	pos = led_animation:GetPosition()
 	if (window:KeyDown(Key.A)) then 	
 		pos.x = pos.x - Time:GetSpeed() * 5		
@@ -120,12 +122,12 @@ while window:KeyDown(Key.Escape)==false do
 	elseif (window:KeyDown(Key.S)) then
 		pos.y = pos.y + Time:GetSpeed() * 5
 	end
-	led_animation:SetPosition(pos.x, pos.y)
-	
+	led_animation:SetPosition(pos.x, pos.y)	
 	if (window:KeyHit(Key.F)) then
 		led_animation:Release()
 	end
 	
+	--Release all elements
 	if (window:KeyHit(Key.Z)) then
 		LED:Release()
 	end
