@@ -49,9 +49,9 @@ function led_panel:MouseIn()
 end
 function led_panel:MouseOut()
 	led_text:SetText("Mouse is OUT :( at " .. Time:GetCurrent() .. ".    Q/E to move me | R to release me.")
-	led_text2 = LED.Text:Create("I'll give you mouse hover coords.")
+	led_text2:SetText("I'll give you mouse hover coords.")
 	self:SetColor(0, 0.75, 0.75, 0.5)
-	self:SetDimensions(128, 64)	
+	self:SetDimensions(128, 64)
 end
 function led_panel:MouseOver(x, y)
 	led_text2:SetText("Mouse OVER coords: x = " .. x .. ", y = " .. y)
@@ -60,11 +60,11 @@ led_panel:SetInteractive(true)
 
 --Animation
 local textures = {}
-texture = Texture:Load("Materials/Icons/PointLight.tex")
-table.insert(textures, texture)
-local texture = Texture:Load("Materials/Icons/DirectionalLight.tex")
+local texture = Texture:Load("Materials/Icons/PointLight.tex")
 table.insert(textures, texture)
 texture = Texture:Load("Materials/Icons/ParticleEmitter.tex")
+table.insert(textures, texture)
+texture = Texture:Load("Materials/Icons/DirectionalLight.tex")
 table.insert(textures, texture)
 
 led_animation = LED.Animation:Create(textures)
