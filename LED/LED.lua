@@ -90,7 +90,7 @@ function LED.Entity:SetInteractive(interactive)
 		end
 	else
 		local index = IndexOf(LED.Interactives, self)
-		table.remove(LED.Interactives, index)
+		if (index) then table.remove(LED.Interactives, index) end		
 	end
 end
 
