@@ -8,7 +8,9 @@ end
 -- LED Namespace
 LED = {}
 
+-- Set of all entities
 LED.Entities = {}
+-- Subset of mouse reactive entities
 LED.Interactives = {}
 
 function LED:Update(context) 
@@ -26,7 +28,7 @@ function LED:Update(context)
 	context:SetRotation(0)
 	context:SetBlendMode(Blend.Solid)
 	
-	-- Interaction
+	-- Mouse interaction
 	if (#LED.Interactives > 0) then
 		local mousePos = Window:GetCurrent():GetMousePosition()
 		for k, e in ipairs(LED.Interactives) do
@@ -45,6 +47,7 @@ function LED:Update(context)
 	end
 end
 
+-- Release all entities
 function LED:Release()
 	for k in pairs (LED.Entities) do
 		LED.Entities[k] = nil
@@ -54,7 +57,7 @@ function LED:Release()
 	end
 end
 
--- ENTITY - Base class
+-- ENTITY - Abstract base class
 LED.Entity = {}
 
 function LED.Entity:Create(initializing)
@@ -149,7 +152,7 @@ function LED.Entity:GetColor()
 	local color = Vec4(self.color.x, self.color.y, self.color.z, self.color.w)
 end
 
--- TEXT
+-- TEXT class
 LED.Text = LED.Entity:Create(true)
 
 function LED.Text:Create(text, font, kerning)
@@ -200,7 +203,7 @@ function LED.Text:GetText()
 	return self.text
 end
 
--- PANEL
+-- PANEL class
 LED.Panel = LED.Entity:Create(true)
 
 function LED.Panel:Create(w, h)
@@ -239,7 +242,7 @@ function LED.Panel:GetHeight()
 	return self.dimensions.y * self.scale.y
 end
 
--- IMAGE
+-- IMAGE class
 LED.Image = LED.Entity:Create(true)
 
 function LED.Image:Create(texture)
@@ -274,7 +277,7 @@ function LED.Image:GetTexture()
 	return self.texture
 end
 
--- ANIMATION
+-- ANIMATION class
 LED.Animation = LED.Entity:Create(true)
 
 function LED.Animation:Create(textures)
