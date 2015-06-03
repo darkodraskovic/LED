@@ -15,14 +15,11 @@ LED.Interactives = {}
 
 function LED:Update(context) 
 	-- Drawing
+	context:SetScale(1, 1)
+	context:SetRotation(0)
 	context:SetBlendMode(Blend.Alpha)
 	for k, e in ipairs(LED.Entities) do
-		if (not e.hidden) then
-			context:SetColor(e.color.x,e.color.y,e.color.z, e.color.w)	
-			context:SetScale(e.scale.x, e.scale.y)
-			context:SetRotation(e.rotation)
-			e:Draw(context)
-		end		
+		if (not e.hidden) then e:Draw(context) end
 	end
 	context:SetScale(1, 1)
 	context:SetRotation(0)
@@ -32,17 +29,7 @@ function LED:Update(context)
 	if (#LED.Interactives > 0) then
 		local mousePos = Window:GetCurrent():GetMousePosition()
 		for k, e in ipairs(LED.Interactives) do
-			if (mousePos.x > e.position.x and mousePos.x < (e.position.x + e:GetWidth()) and
-				mousePos.y > e.position.y and mousePos.y < (e.position.y + e:GetHeight())) then
-				if (not e._mouseOver) then
-					e:MouseIn() 					
-					e._mouseOver = true
-				end
-				e:MouseOver(mousePos.x, mousePos.y) 					
-			elseif (e._mouseOver) then
-				e:MouseOut() 					
-				e._mouseOver = false			
-			end
+			if (not e.hidden) then e:Interact(mousePos.x, mousePos.y) end			
 		end
 	end
 end
@@ -80,6 +67,26 @@ function LED.Entity:Release()
 	if (index) then table.remove(LED.Entities, index) end	
 	local index = IndexOf(LED.Interactives, self)
 	if (index) then table.remove(LED.Interactives, index) end
+end
+
+function LED.Entity:Draw(context)
+	context:SetColor(self.color.x,self.color.y,self.color.z, self.color.w)	
+	context:SetScale(self.scale.x, self.scale.y)
+	context:SetRotation(self.rotation)
+end
+
+function LED.Entity:Interact(x, y)
+	if (x > self.position.x and x < (self.position.x + self:GetWidth()) and
+		y > self.position.y and y < (self.position.y + self:GetHeight())) then
+		if (not self._mouseOver) then
+			self:MouseIn() 					
+			self._mouseOver = true
+		end
+		self:MouseOver(x, y) 					
+	elseif (self._mouseOver) then
+		self:MouseOut() 					
+		self._mouseOver = false			
+	end
 end
 
 function LED.Entity:SetInteractive(interactive)
@@ -175,6 +182,7 @@ function LED.Text:Create(text, font, kerning)
 end
 
 function LED.Text:Draw(context)
+	LED.Entity.Draw(self, context)
 	context:SetFont(self.font)
 	context:DrawText(self.text, self.position.x, self.position.y, self.kerning or 1)
 end
@@ -214,6 +222,7 @@ function LED.Panel:Create(w, h)
 end
 
 function LED.Panel:Draw(context)
+	LED.Entity.Draw(self, context)
 	context:DrawRect(self.position.x, self.position.y, self.dimensions.x, self.dimensions.y, self.style)
 end
 
@@ -258,6 +267,7 @@ function LED.Image:Create(texture)
 end
 
 function LED.Image:Draw(context)
+	LED.Entity.Draw(self, context)
 	context:DrawImage(self.texture, self.position.x, self.position.y)
 end
 
@@ -293,6 +303,7 @@ function LED.Animation:Create(textures)
 end
 
 function LED.Animation:Draw(context)
+	LED.Entity.Draw(self, context)
 	if (self.playing) then
 		self.currentFrame = self.currentFrame + (Time:GetSpeed() / 60) * self.speed
 		self.currentFrame = self.currentFrame % #self.frames		
