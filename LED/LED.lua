@@ -239,47 +239,47 @@ function LED.Text:GetText()
 	return self.text
 end
 
--- PANEL class
-LED.Panel = LED.Entity:Create(true)
+-- Rect class
+LED.Rect = LED.Entity:Create(true)
 
-function LED.Panel:Create(w, h)
-	local panel = LED.Entity.Create(self)	
-	panel:SetColor(0.5, 0.5, 0.5, 0.5)	
-	panel.dimensions = Vec2(w or 64, h or 64)
-	panel.shader = LED.Shaders.drawprimitive
-	return panel
+function LED.Rect:Create(w, h)
+	local rect = LED.Entity.Create(self)	
+	rect:SetColor(0.5, 0.5, 0.5, 0.5)	
+	rect.dimensions = Vec2(w or 64, h or 64)
+	rect.shader = LED.Shaders.drawprimitive
+	return rect
 end
 
 
-function LED.Panel:Draw(context)		
+function LED.Rect:Draw(context)		
 	LED.Entity.Draw(self, context)
 	context:DrawRect(self.position.x + self.offset.x, self.position.y + self.offset.y, 
 		self.dimensions.x, self.dimensions.y, self.style)	
 end
 
-function LED.Panel:SetDimensions(w, h)
+function LED.Rect:SetDimensions(w, h)
 	self.dimensions.x = w
 	self.dimensions.y = h
 	self:CalcOffset(self.pivot.x, self.pivot.y)
 end
 
-function LED.Panel:GetDimensions()
+function LED.Rect:GetDimensions()
 	return Vec2(self.dimensions.x, self.dimensions.y)
 end
 
-function LED.Panel:SetStyle(style)
+function LED.Rect:SetStyle(style)
 	self.style = style
 end
 
-function LED.Panel:GetStyle()
+function LED.Rect:GetStyle()
 	return self.style
 end
 
-function LED.Panel:GetWidth() 
+function LED.Rect:GetWidth() 
 	return self.dimensions.x * self.scale.x
 end
 
-function LED.Panel:GetHeight() 
+function LED.Rect:GetHeight() 
 	return self.dimensions.y * self.scale.y
 end
 

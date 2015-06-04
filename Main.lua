@@ -38,33 +38,33 @@ led_text:SetScale(1.25, 1.25)
 led_text2 = LED.Text:Create("I'll give you mouse hover coords.")
 led_text2:SetPosition(pos.x + 4, pos.y + led_image:GetHeight() / 4 - led_text:GetHeight() + 16)
 
---Panel
-led_panel = LED.Panel:Create(128, 64)
+--Rect
+led_rect = LED.Rect:Create(128, 64)
 pos = led_image:GetPosition()
-led_panel:SetPosition(pos.x + 32, pos.y + 32)
---led_panel:SetPivot(0.5, 0.5)
-led_panel:SetScale(0.75, 0.75)
-led_panel:SetColor(0, 0.75, 0.75, 0.5)
-function led_panel:MouseIn()
-	led_text:SetText("I'm LED panel and mouse is IN me :) at " .. Time:GetCurrent() .. ".")
+led_rect:SetPosition(pos.x + 32, pos.y + 32)
+--led_rect:SetPivot(0.5, 0.5)
+led_rect:SetScale(0.75, 0.75)
+led_rect:SetColor(0, 0.75, 0.75, 0.5)
+function led_rect:MouseIn()
+	led_text:SetText("I'm LED rect and mouse is IN me :) at " .. Time:GetCurrent() .. ".")
 	self:SetColor(0.8, 0.1, 0.85, 0.9)
 	self:SetDimensions(148, 80)
 end
-function led_panel:MouseOut()
+function led_rect:MouseOut()
 	led_text:SetText("Mouse is OUT :( at " .. Time:GetCurrent() .. ".    Q/E to move me | R to release me.")
 	led_text2:SetText("I'll give you mouse hover coords.")
 	self:SetColor(0, 0.75, 0.75, 0.5)
 	self:SetDimensions(128, 64)
 end
-function led_panel:MouseOver(x, y)
+function led_rect:MouseOver(x, y)
 	led_text2:SetText("Mouse OVER coords: x = " .. x .. ", y = " .. y)
 end
-led_panel:SetInteractive(true)
+led_rect:SetInteractive(true)
 
-led_panel2 = LED.Panel:Create(32, 64)
-led_panel2:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.75)
-led_panel2:SetColor(0, 0.75, 0, 0.5)
-led_panel2:SetPivot(0.5, 0.5)
+led_rect2 = LED.Rect:Create(32, 64)
+led_rect2:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.75)
+led_rect2:SetColor(0, 0.75, 0, 0.5)
+led_rect2:SetPivot(0.5, 0.5)
 
 
 --Animation
@@ -115,17 +115,17 @@ while window:KeyDown(Key.Escape)==false do
 	--Image logic
 	--led_image:SetRotation(led_image:GetRotation() + Time:GetSpeed() / 10)
 	
-	--Panel logic
-	local pos = led_panel:GetPosition()
+	--rect logic
+	local pos = led_rect:GetPosition()
 	if (window:KeyDown(Key.Q)) then 		
-		led_panel:SetPosition(pos.x - Time:GetSpeed() * 5, pos.y)
+		led_rect:SetPosition(pos.x - Time:GetSpeed() * 5, pos.y)
 	elseif (window:KeyDown(Key.E)) then
-		led_panel:SetPosition(pos.x + Time:GetSpeed() * 5, pos.y)
+		led_rect:SetPosition(pos.x + Time:GetSpeed() * 5, pos.y)
 	end	
 	if (window:KeyHit(Key.R)) then
-		led_panel:Release()
+		led_rect:Release()
 	end		
-	led_panel2:SetRotation(led_panel2:GetRotation() + Time:GetSpeed())
+	led_rect2:SetRotation(led_rect2:GetRotation() + Time:GetSpeed())
 	
 	--Animation logic 
 	pos = led_animation:GetPosition()
