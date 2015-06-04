@@ -62,7 +62,7 @@ function LED.Entity:Create(initializing)
 end
 
 function LED.Entity:Update(context, x, y)
-	if (self.interacting) then self:Interact(x, y) end
+	if (self.interacting) then self:Interaction(x, y) end
 	--if (self.colliding) then self:Collide(x, y) end
 	
 	context:SetShader(self.shader or nil)
@@ -76,7 +76,7 @@ function LED.Entity:Draw(context)
 	self.shader:SetVec4("LED_drawcolor", self.color)		
 end
 
-function LED.Entity:Interact(x, y)
+function LED.Entity:Interaction(x, y)
 	if (x > self.position.x and x < (self.position.x + self:GetWidth()) and
 		y > self.position.y and y < (self.position.y + self:GetHeight())) then
 		if (not self._mouseOver) then
