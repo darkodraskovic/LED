@@ -13,13 +13,23 @@ LED.Entities = {}
 -- Subset of mouse reactive entities
 LED.Interactives = {}
 
-function LED:Update(context) 
+LED.Shaders = {
+	drawprimitive = Shader:Load("Scripts/LED/drawprimitive.shader"),
+	drawimage = Shader:Load("Scripts/LED/drawimage.shader"),
+	drawtext = Shader:Load("Scripts/LED/drawtext.shader")
+}
+
+function LED:Update(context)
 	-- Drawing
 	context:SetScale(1, 1)
 	context:SetRotation(0)
 	context:SetBlendMode(Blend.Alpha)
 	for k, e in ipairs(LED.Entities) do
-		if (not e.hidden) then e:Draw(context) end
+		if (not e.hidden) then 
+			context:SetShader(e.shader)
+			e:Draw(context) 
+			context:SetShader(nil)
+		end
 	end
 	context:SetScale(1, 1)
 	context:SetRotation(0)
@@ -55,6 +65,8 @@ function LED.Entity:Create(initializing)
 	entity.hidden = false
 	entity.scale = Vec2(1, 1)
 	entity.rotation = 0
+	entity.pivot = Vec2(0, 0)
+	entity.offset = Vec2(0, 0)
 	entity.interactive = false
 	setmetatable(entity, self)
 	self.__index = self
@@ -69,10 +81,11 @@ function LED.Entity:Release()
 	if (index) then table.remove(LED.Interactives, index) end
 end
 
-function LED.Entity:Draw(context)
-	context:SetColor(self.color.x,self.color.y,self.color.z, self.color.w)	
+function LED.Entity:Draw(context)		
 	context:SetScale(self.scale.x, self.scale.y)
 	context:SetRotation(self.rotation)
+	self.shader:SetVec2("LED_pivot", Vec2(self.offset.x / self.scale.x, self.offset.y / self.scale.y))
+	self.shader:SetVec4("LED_drawcolor", self.color)		
 end
 
 function LED.Entity:Interact(x, y)
@@ -92,9 +105,7 @@ end
 function LED.Entity:SetInteractive(interactive)
 	if (interactive) then 
 		local index = IndexOf(LED.Interactives, self)
-		if (not index) then
-			table.insert(LED.Interactives, self)
-		end
+		if (not index) then table.insert(LED.Interactives, self) end
 	else
 		local index = IndexOf(LED.Interactives, self)
 		if (index) then table.remove(LED.Interactives, index) end		
@@ -126,6 +137,7 @@ end
 function LED.Entity:SetScale(x, y)
 	self.scale.x = x
 	self.scale.y = y
+	self:CalcOffset(self.pivot.x, self.pivot.y)
 end
 
 function LED.Entity:GetScale()
@@ -138,6 +150,21 @@ end
 
 function LED.Entity:GetRotation()
 	return self.rotation
+end
+
+function LED.Entity:SetPivot(x, y)
+	self.pivot.x = x
+	self.pivot.y = y
+	self:CalcOffset(x, y)
+end
+
+function LED.Entity:CalcOffset(x, y)
+	self.offset.x = x * self:GetWidth()
+	self.offset.y = y * self:GetHeight()
+end
+
+function LED.Entity:GetPivot()
+	return Vec2(self.pivot.x, self.pivot.y)
 end
 
 function LED.Entity:SetHidden(hidden)
@@ -178,6 +205,7 @@ function LED.Text:Create(text, font, kerning)
 	textEntity:SetColor(0, 0, 0, 1)
 	textEntity.text = text or "Text"
 	textEntity.kerning = kerning or 1	
+	textEntity.shader = LED.Shaders.drawtext
 	return textEntity
 end
 
@@ -218,17 +246,21 @@ function LED.Panel:Create(w, h)
 	local panel = LED.Entity.Create(self)	
 	panel:SetColor(0.5, 0.5, 0.5, 0.5)	
 	panel.dimensions = Vec2(w or 64, h or 64)
+	panel.shader = LED.Shaders.drawprimitive
 	return panel
 end
 
-function LED.Panel:Draw(context)
+
+function LED.Panel:Draw(context)		
 	LED.Entity.Draw(self, context)
-	context:DrawRect(self.position.x, self.position.y, self.dimensions.x, self.dimensions.y, self.style)
+	context:DrawRect(self.position.x + self.offset.x, self.position.y + self.offset.y, 
+		self.dimensions.x, self.dimensions.y, self.style)	
 end
 
 function LED.Panel:SetDimensions(w, h)
 	self.dimensions.x = w
 	self.dimensions.y = h
+	self:CalcOffset(self.pivot.x, self.pivot.y)
 end
 
 function LED.Panel:GetDimensions()
@@ -254,8 +286,8 @@ end
 -- IMAGE class
 LED.Image = LED.Entity:Create(true)
 
-function LED.Image:Create(texture)
-	local image = LED.Entity.Create(self)
+function LED.Image:Create(texture, initializing)
+	local image = LED.Entity.Create(self, initializing)
 	
 	if (type(texture) == "string") then
 		image.texture = Texture:Load(texture)
@@ -263,12 +295,14 @@ function LED.Image:Create(texture)
 		image.texture = texture	
 	end
 		
+	image.shader = LED.Shaders.drawimage
+		
 	return image
 end
 
 function LED.Image:Draw(context)
 	LED.Entity.Draw(self, context)
-	context:DrawImage(self.texture, self.position.x, self.position.y)
+	context:DrawImage(self.texture, self.position.x + self.offset.x, self.position.y + self.offset.y)	
 end
 
 function LED.Image:GetWidth() 
@@ -294,11 +328,12 @@ function LED.Animation:Create(textures)
 	local animation = LED.Entity.Create(self)
 	animation.frames = {}
 	for k, v in ipairs(textures) do
-		animation.frames[k] = v
+		animation.frames[k] = LED.Image:Create(v, true)		
 	end
 	animation.playing = true
 	animation.currentFrame = 0
 	animation.speed = 1
+	animation.shader = LED.Shaders.drawimage
 	return animation
 end
 
@@ -308,7 +343,15 @@ function LED.Animation:Draw(context)
 		self.currentFrame = self.currentFrame + (Time:GetSpeed() / 60) * self.speed
 		self.currentFrame = self.currentFrame % #self.frames		
 	end
-	context:DrawImage(self.frames[math.floor(self.currentFrame + 1)], self.position.x, self.position.y)
+	context:DrawImage(self.frames[math.floor(self.currentFrame + 1)].texture, 
+		self.position.x + self.offset.x, self.position.y + self.offset.y)
+end
+
+function LED.Animation:SetPivot(x, y)
+	LED.Entity.SetPivot(self, x, y)
+	for k, v in ipairs(self.frames) do
+		v:SetPivot(x, y)
+	end
 end
 
 function LED.Animation:GetWidth() 

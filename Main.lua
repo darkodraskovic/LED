@@ -26,6 +26,7 @@ local pos
 --Image
 led_image = LED.Image:Create("Materials/Developer/GreyGrid.tex")
 led_image:SetScale(0.5, 0.5)
+led_image:SetPivot(0.5, 0.5)
 led_image:SetPosition(window:GetWidth() / 2 - led_image:GetWidth() / 2, window:GetHeight() / 2 - led_image:GetHeight() / 2)
 
 --Text
@@ -41,6 +42,8 @@ led_text2:SetPosition(pos.x + 4, pos.y + led_image:GetHeight() / 4 - led_text:Ge
 led_panel = LED.Panel:Create(128, 64)
 pos = led_image:GetPosition()
 led_panel:SetPosition(pos.x + 32, pos.y + 32)
+--led_panel:SetPivot(0.5, 0.5)
+led_panel:SetScale(0.75, 0.75)
 led_panel:SetColor(0, 0.75, 0.75, 0.5)
 function led_panel:MouseIn()
 	led_text:SetText("I'm LED panel and mouse is IN me :) at " .. Time:GetCurrent() .. ".")
@@ -58,6 +61,12 @@ function led_panel:MouseOver(x, y)
 end
 led_panel:SetInteractive(true)
 
+led_panel2 = LED.Panel:Create(32, 64)
+led_panel2:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.75)
+led_panel2:SetColor(0, 0.75, 0, 0.5)
+led_panel2:SetPivot(0.5, 0.5)
+
+
 --Animation
 local textures = {}
 local texture = Texture:Load("Materials/Icons/PointLight.tex")
@@ -74,12 +83,16 @@ led_animation:SetPlaying(false)
 led_animation:SetSpeed(3)
 led_animation:SetInteractive(true)
 led_animation:SetColor(0.2, 0.2, 0.2, 1)
+led_animation.isRotating = false -- custom var, not part of LED 
 function led_animation:MouseOver()
 	if window:MouseHit(1) then
 		self:SetPlaying(not self:GetPlaying())
 		led_animation:SetColor(1, 1, 1, 1)
+		led_animation.isRotating = true
 	end
 end
+led_animation:SetScale(2, 2)
+led_animation:SetPivot(0.5, 0.5)
 
 led_text3 = LED.Text:Create("Click me ;) WASD to move me | F to release me.")
 pos = led_animation:GetPosition()
@@ -99,6 +112,9 @@ while window:KeyDown(Key.Escape)==false do
 	--Render the world
 	world:Render()
 	
+	--Image logic
+	--led_image:SetRotation(led_image:GetRotation() + Time:GetSpeed() / 10)
+	
 	--Panel logic
 	local pos = led_panel:GetPosition()
 	if (window:KeyDown(Key.Q)) then 		
@@ -108,7 +124,8 @@ while window:KeyDown(Key.Escape)==false do
 	end	
 	if (window:KeyHit(Key.R)) then
 		led_panel:Release()
-	end
+	end		
+	led_panel2:SetRotation(led_panel2:GetRotation() + Time:GetSpeed())
 	
 	--Animation logic 
 	pos = led_animation:GetPosition()
@@ -125,6 +142,9 @@ while window:KeyDown(Key.Escape)==false do
 	led_animation:SetPosition(pos.x, pos.y)	
 	if (window:KeyHit(Key.F)) then
 		led_animation:Release()
+	end		
+	if (led_animation.isRotating) then
+		led_animation:SetRotation(led_animation:GetRotation() + Time:GetSpeed() / 5)
 	end
 	
 	--Release all elements
