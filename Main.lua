@@ -59,7 +59,7 @@ end
 function led_rect:MouseOver(x, y)
 	led_text2:SetText("Mouse OVER coords: x = " .. x .. ", y = " .. y)
 end
-led_rect:SetInteractive(true)
+led_rect:SetInteracting(true)
 
 led_rect2 = LED.Rect:Create(32, 64)
 led_rect2:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.75)
@@ -81,7 +81,7 @@ pos = led_image:GetPosition()
 led_animation:SetPosition(pos.x + led_image:GetWidth() * 0.75, pos.y + led_image:GetHeight() * 0.75)
 led_animation:SetPlaying(false)
 led_animation:SetSpeed(3)
-led_animation:SetInteractive(true)
+led_animation:SetInteracting(true)
 led_animation:SetColor(0.2, 0.2, 0.2, 1)
 led_animation.isRotating = false -- custom var, not part of LED 
 function led_animation:MouseOver()

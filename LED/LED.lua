@@ -10,8 +10,6 @@ LED = {}
 
 -- Set of all entities
 LED.Entities = {}
--- Subset of mouse reactive entities
-LED.Interactives = {}
 
 LED.Shaders = {
 	drawprimitive = Shader:Load("Scripts/LED/drawprimitive.shader"),
@@ -20,37 +18,25 @@ LED.Shaders = {
 }
 
 function LED:Update(context)
-	-- Drawing
-	context:SetScale(1, 1)
-	context:SetRotation(0)
 	context:SetBlendMode(Blend.Alpha)
-	for k, e in ipairs(LED.Entities) do
-		if (not e.hidden) then 
-			context:SetShader(e.shader)
-			e:Draw(context) 
-			context:SetShader(nil)
-		end
-	end
 	context:SetScale(1, 1)
 	context:SetRotation(0)
-	context:SetBlendMode(Blend.Solid)
+	local mousePos = Window:GetCurrent():GetMousePosition()
 	
-	-- Mouse interaction
-	if (#LED.Interactives > 0) then
-		local mousePos = Window:GetCurrent():GetMousePosition()
-		for k, e in ipairs(LED.Interactives) do
-			if (not e.hidden) then e:Interact(mousePos.x, mousePos.y) end			
-		end
+	for k, e in ipairs(LED.Entities) do
+		if (not e.hidden) then e:Update(context, mousePos.x, mousePos.y) end
 	end
+	
+	context:SetShader(nil)
+	context:SetRotation(0)
+	context:SetScale(1, 1)
+	context:SetBlendMode(Blend.Solid)
 end
 
 -- Release all entities
 function LED:Release()
 	for k in pairs (LED.Entities) do
 		LED.Entities[k] = nil
-	end
-	for k in pairs (LED.Interactives) do
-		LED.Interactives[k] = nil
 	end
 end
 
@@ -67,18 +53,20 @@ function LED.Entity:Create(initializing)
 	entity.rotation = 0
 	entity.pivot = Vec2(0, 0)
 	entity.offset = Vec2(0, 0)
-	entity.interactive = false
+	entity.interacting = false
+	--entity.colliding = false
 	setmetatable(entity, self)
 	self.__index = self
 	if (not initializing) then table.insert(LED.Entities, entity) end	
 	return entity
 end
 
-function LED.Entity:Release()
-	local index = IndexOf(LED.Entities, self)
-	if (index) then table.remove(LED.Entities, index) end	
-	local index = IndexOf(LED.Interactives, self)
-	if (index) then table.remove(LED.Interactives, index) end
+function LED.Entity:Update(context, x, y)
+	if (self.interacting) then self:Interact(x, y) end
+	--if (self.colliding) then self:Collide(x, y) end
+	
+	context:SetShader(self.shader or nil)
+	self:Draw(context)
 end
 
 function LED.Entity:Draw(context)		
@@ -102,18 +90,17 @@ function LED.Entity:Interact(x, y)
 	end
 end
 
-function LED.Entity:SetInteractive(interactive)
-	if (interactive) then 
-		local index = IndexOf(LED.Interactives, self)
-		if (not index) then table.insert(LED.Interactives, self) end
-	else
-		local index = IndexOf(LED.Interactives, self)
-		if (index) then table.remove(LED.Interactives, index) end		
-	end
+function LED.Entity:Release()
+	local index = IndexOf(LED.Entities, self)
+	if (index) then table.remove(LED.Entities, index) end
 end
 
-function LED.Entity:GetInteractive()
-	return IndexOf(LED.Interactives, self)
+function LED.Entity:SetInteracting(interacting)
+	self.interacting = interacting
+end
+
+function LED.Entity:GetInteracting()
+	return self.interacting
 end
 
 function LED.Entity:MouseIn()
