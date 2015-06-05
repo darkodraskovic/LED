@@ -53,8 +53,8 @@ function LED.Entity:Create(initializing)
 	entity.rotation = 0
 	entity.pivot = Vec2(0, 0)
 	entity.offset = Vec2(0, 0)
-	entity.interacting = false
-	--entity.colliding = false
+	entity.sensor = false
+	--entity.intersecting = false
 	setmetatable(entity, self)
 	self.__index = self
 	if (not initializing) then table.insert(LED.Entities, entity) end	
@@ -62,8 +62,14 @@ function LED.Entity:Create(initializing)
 end
 
 function LED.Entity:Update(context, x, y)
-	if (self.interacting) then self:Interaction(x, y) end
-	--if (self.colliding) then self:Collide(x, y) end
+	if (self.interacting) then self:Interact(x, y) end
+	if (type(self.Intersection) == "function") then 
+		for i, e in ipairs(LED.Entities) do			
+			if (e.sensor and e ~= self) then 
+				self:Intersect(e) 
+			end
+		end
+	end
 	
 	context:SetShader(self.shader or nil)
 	self:Draw(context)
@@ -76,7 +82,7 @@ function LED.Entity:Draw(context)
 	self.shader:SetVec4("LED_drawcolor", self.color)		
 end
 
-function LED.Entity:Interaction(x, y)
+function LED.Entity:Interact(x, y)
 	if (x > self.position.x and x < (self.position.x + self:GetWidth()) and
 		y > self.position.y and y < (self.position.y + self:GetHeight())) then
 		if (not self._mouseOver) then
@@ -90,9 +96,13 @@ function LED.Entity:Interaction(x, y)
 	end
 end
 
-function LED.Entity:Release()
-	local index = IndexOf(LED.Entities, self)
-	if (index) then table.remove(LED.Entities, index) end
+function LED.Entity:MouseIn()
+end
+
+function LED.Entity:MouseOut()
+end
+
+function LED.Entity:MouseOver(x, y)
 end
 
 function LED.Entity:SetInteracting(interacting)
@@ -103,13 +113,27 @@ function LED.Entity:GetInteracting()
 	return self.interacting
 end
 
-function LED.Entity:MouseIn()
+function LED.Entity:Intersect(entity)
+	if ((self.position.x + self:GetWidth()) > entity.position.x and self.position.x < (entity.position.x + entity:GetWidth()) and
+		(self.position.y + self:GetHeight()) > entity.position.y and self.position.y < (entity.position.y + entity:GetHeight())) then
+		local xDiff = entity.position.x - self.position.x
+		local yDiff = entity.position.y - self.position.y
+		local normal = Vec2(xDiff / math.abs(xDiff), yDiff / math.abs(yDiff))
+		self:Intersection(entity, normal)
+	end
 end
 
-function LED.Entity:MouseOut()
+function LED.Entity:SetSensor(sensor)
+	self.sensor = sensor
 end
 
-function LED.Entity:MouseOver(x, y)
+function LED.Entity:GetSensor()
+	return self.sensor
+end
+
+function LED.Entity:Release()
+	local index = IndexOf(LED.Entities, self)
+	if (index) then table.remove(LED.Entities, index) end
 end
 
 function LED.Entity:SetPosition(x, y)

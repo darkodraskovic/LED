@@ -60,11 +60,30 @@ function led_rect:MouseOver(x, y)
 	led_text2:SetText("Mouse OVER coords: x = " .. x .. ", y = " .. y)
 end
 led_rect:SetInteracting(true)
+led_rect.name = "cyan rectangle" -- not a LED var
+led_rect:SetSensor(true)
 
 led_rect2 = LED.Rect:Create(32, 64)
 led_rect2:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.75)
 led_rect2:SetColor(0, 0.75, 0, 0.5)
 led_rect2:SetPivot(0.5, 0.5)
+led_rect2.name = "green rectangle"
+led_rect2:SetSensor(true)
+
+led_rect3 = LED.Rect:Create(64, 32)
+led_rect3:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.9)
+led_rect3:SetColor(0.75, 0, 0, 0.5)
+led_rect3:SetPivot(0.5, 0.5)
+led_rect3.name = "rect3"
+
+led_text4 = LED.Text:Create("WASD to move me. Hint: move me over other entities ;)")
+pos = led_rect3:GetPosition()
+led_text4:SetPosition(pos.x, pos.y + 36)
+led_text4:SetColor(0.75, 0, 0, 0.5)
+
+function led_rect3:Intersection(entity, normal)
+	led_text4:SetText("I collide with " .. entity.name .. " at " .. Time:GetCurrent())
+end
 
 
 --Animation
@@ -93,8 +112,10 @@ function led_animation:MouseOver()
 end
 led_animation:SetScale(2, 2)
 led_animation:SetPivot(0.5, 0.5)
+led_animation.name = "animation"
+led_animation:SetSensor(true)
 
-led_text3 = LED.Text:Create("Click me ;) WASD to move me | F to release me.")
+led_text3 = LED.Text:Create("Click me! | F to release me.")
 pos = led_animation:GetPosition()
 led_text3:SetPosition(pos.x - led_text3:GetWidth() / 2 - 8, pos.y - 48)
 
@@ -125,8 +146,23 @@ while window:KeyDown(Key.Escape)==false do
 	if (window:KeyHit(Key.R)) then
 		led_rect:Release()
 	end		
-	led_rect2:SetRotation(led_rect2:GetRotation() + Time:GetSpeed())
+	--led_rect2:SetRotation(led_rect2:GetRotation() + Time:GetSpeed())
 	
+	pos = led_rect3:GetPosition()
+	if (window:KeyDown(Key.A)) then 	
+		pos.x = pos.x - Time:GetSpeed() * 3		
+	elseif (window:KeyDown(Key.D)) then
+		pos.x = pos.x + Time:GetSpeed() * 3
+	end
+	if (window:KeyDown(Key.W)) then 		
+		pos.y = pos.y - Time:GetSpeed() * 3
+	elseif (window:KeyDown(Key.S)) then
+		pos.y = pos.y + Time:GetSpeed() * 3
+	end
+	led_rect3:SetPosition(pos.x, pos.y)	
+	
+	
+	--[[
 	--Animation logic 
 	pos = led_animation:GetPosition()
 	if (window:KeyDown(Key.A)) then 	
@@ -139,10 +175,14 @@ while window:KeyDown(Key.Escape)==false do
 	elseif (window:KeyDown(Key.S)) then
 		pos.y = pos.y + Time:GetSpeed() * 5
 	end
-	led_animation:SetPosition(pos.x, pos.y)	
+	led_animation:SetPosition(pos.x, pos.y)		
+	if (led_animation.isRotating) then
+		led_animation:SetRotation(led_animation:GetRotation() + Time:GetSpeed() / 5)
+	end
+	--]]
 	if (window:KeyHit(Key.F)) then
 		led_animation:Release()
-	end		
+	end	
 	if (led_animation.isRotating) then
 		led_animation:SetRotation(led_animation:GetRotation() + Time:GetSpeed() / 5)
 	end
