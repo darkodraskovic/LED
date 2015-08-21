@@ -25,6 +25,7 @@ local pos
 
 --Image
 led_image = LED.Image:Create("Materials/Developer/GreyGrid.tex")
+--led_image = LED.Image:Create("Materials/Abstract/TestRect.tex")
 led_image:SetScale(0.5, 0.5)
 led_image:SetPivot(0.5, 0.5)
 led_image:SetPosition(window:GetWidth() / 2 - led_image:GetWidth() / 2, window:GetHeight() / 2 - led_image:GetHeight() / 2)
