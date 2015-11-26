@@ -23,14 +23,13 @@ import "Scripts/LED/LED.lua"
 
 local pos
 
---Image
+--IMAGE
 led_image = LED.Image:Create("Materials/Developer/GreyGrid.tex")
---led_image = LED.Image:Create("Materials/Abstract/TestRect.tex")
 led_image:SetScale(0.5, 0.5)
 led_image:SetPivot(0.5, 0.5)
 led_image:SetPosition(window:GetWidth() / 2 - led_image:GetWidth() / 2, window:GetHeight() / 2 - led_image:GetHeight() / 2)
 
---Text
+--TEXT
 led_text = LED.Text:Create("Hover the mouse over me ;)")
 pos = led_image:GetPosition()
 led_text:SetPosition(pos.x + 4, pos.y + led_image:GetHeight() / 4 - led_text:GetHeight() - 4)
@@ -39,13 +38,17 @@ led_text:SetScale(1.25, 1.25)
 led_text2 = LED.Text:Create("I'll give you mouse hover coords.")
 led_text2:SetPosition(pos.x + 4, pos.y + led_image:GetHeight() / 4 - led_text:GetHeight() + 16)
 
---Rect
+--RECT
+--cyan rect
 led_rect = LED.Rect:Create(128, 64)
 pos = led_image:GetPosition()
 led_rect:SetPosition(pos.x + 32, pos.y + 32)
---led_rect:SetPivot(0.5, 0.5)
 led_rect:SetScale(0.75, 0.75)
 led_rect:SetColor(0, 0.75, 0.75, 0.5)
+--user-defined callback: entity is mouse reactive if Interaction is defined
+function led_rect:Interaction(x, y)
+	led_text2:SetText("Mouse OVER coords: x = " .. x .. ", y = " .. y)
+end
 function led_rect:MouseIn()
 	led_text:SetText("I'm LED rect and mouse is IN me :) at " .. Time:GetCurrent() .. ".")
 	self:SetColor(0.8, 0.1, 0.85, 0.9)
@@ -57,13 +60,10 @@ function led_rect:MouseOut()
 	self:SetColor(0, 0.75, 0.75, 0.5)
 	self:SetDimensions(128, 64)
 end
-function led_rect:MouseOver(x, y)
-	led_text2:SetText("Mouse OVER coords: x = " .. x .. ", y = " .. y)
-end
-led_rect:SetInteracting(true)
 led_rect.name = "cyan rectangle" -- not a LED var
 led_rect:SetSensor(true)
 
+--green rect
 led_rect2 = LED.Rect:Create(32, 64)
 led_rect2:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.75)
 led_rect2:SetColor(0, 0.75, 0, 0.5)
@@ -71,23 +71,22 @@ led_rect2:SetPivot(0.5, 0.5)
 led_rect2.name = "green rectangle"
 led_rect2:SetSensor(true)
 
+--red rect
 led_rect3 = LED.Rect:Create(64, 32)
 led_rect3:SetPosition(pos.x + 48, pos.y + led_image:GetHeight() * 0.9)
 led_rect3:SetColor(0.75, 0, 0, 0.5)
 led_rect3:SetPivot(0.5, 0.5)
-led_rect3.name = "rect3"
-
-led_text4 = LED.Text:Create("WASD to move me. Hint: move me over other entities ;)")
+led_rect3.name = "player"
+led_text3 = LED.Text:Create("WASD to move me. Hint: move me over other entities ;)")
 pos = led_rect3:GetPosition()
-led_text4:SetPosition(pos.x, pos.y + 36)
-led_text4:SetColor(0.75, 0, 0, 0.5)
-
+led_text3:SetPosition(pos.x, pos.y + 36)
+led_text3:SetColor(0.75, 0, 0, 0.5)
+--user-defined callback: intersection is tested only if Intersection is defined
 function led_rect3:Intersection(entity, normal)
-	led_text4:SetText("I collide with " .. entity.name .. " at " .. Time:GetCurrent())
+	led_text3:SetText("I collide with " .. entity.name .. " at " .. Time:GetCurrent())
 end
 
-
---Animation
+--ANIMATION
 local textures = {}
 local texture = Texture:Load("Materials/Icons/PointLight.tex")
 table.insert(textures, texture)
@@ -101,10 +100,9 @@ pos = led_image:GetPosition()
 led_animation:SetPosition(pos.x + led_image:GetWidth() * 0.75, pos.y + led_image:GetHeight() * 0.75)
 led_animation:SetPlaying(false)
 led_animation:SetSpeed(3)
-led_animation:SetInteracting(true)
 led_animation:SetColor(0.2, 0.2, 0.2, 1)
 led_animation.isRotating = false -- custom var, not part of LED 
-function led_animation:MouseOver()
+function led_animation:Interaction()
 	if window:MouseHit(1) then
 		self:SetPlaying(not self:GetPlaying())
 		led_animation:SetColor(1, 1, 1, 1)
@@ -116,9 +114,9 @@ led_animation:SetPivot(0.5, 0.5)
 led_animation.name = "animation"
 led_animation:SetSensor(true)
 
-led_text3 = LED.Text:Create("Click me! | F to release me.")
+led_text4 = LED.Text:Create("Click me! | F to release me.")
 pos = led_animation:GetPosition()
-led_text3:SetPosition(pos.x - led_text3:GetWidth() / 2 - 8, pos.y - 48)
+led_text4:SetPosition(pos.x - led_text3:GetWidth() / 2 - 8, pos.y - 48)
 
 while window:KeyDown(Key.Escape)==false do
 	

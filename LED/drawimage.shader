@@ -47,12 +47,10 @@ void main(void)
 uniform vec4 LED_drawcolor;
 uniform sampler2D texture0;
 
-uniform vec2 LED_uvcoords = vec2(0,0);
-
 in vec2 vTexCoords0;
 out vec4 fragData0;
 
 void main(void)
 {
-    fragData0 = LED_drawcolor * texture(texture0, vTexCoords0 + LED_uvcoords);
+    fragData0 = LED_drawcolor * texture(texture0, vTexCoords0);
 }
